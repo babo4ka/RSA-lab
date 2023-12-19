@@ -34,7 +34,6 @@ public class RSAGenerator {
 
     public RSAGenerator(int length){
         this.length = length;
-        System.out.println(length);
         generateP();
         generateQ();
         countN();
@@ -43,27 +42,27 @@ public class RSAGenerator {
         generateD();
     }
 
-    public void generateP(){
+    private void generateP(){
         this.p = pn.generatePrime(this.length);
-        System.out.println(this.p);
+//        System.out.println(this.p);
     }
 
-    public void generateQ(){
+    private void generateQ(){
         this.q = pn.generatePrime(this.length);
-        System.out.println(this.q);
+//        System.out.println(this.q);
     }
 
-    public void countN(){
+    private void countN(){
         this.n = p.multiply(q);
-        System.out.println(this.n);
+//        System.out.println(this.n);
     }
 
-    public void countFN(){
+    private void countFN(){
         this.Fn = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
-        System.out.println("fn " + this.Fn);
+//        System.out.println("fn " + this.Fn);
     }
 
-    public void generateE(){
+    private void generateE(){
         Random rand = new Random();
         BigInteger tempE = rand.rand(BigInteger.ONE, this.Fn);
 
@@ -73,20 +72,31 @@ public class RSAGenerator {
 
         this.e = tempE;
 
-        System.out.println(this.e);
+//        System.out.println(this.e);
     }
 
-    public void generateD(){
-        Random rand = new Random();
-        BigInteger tempD = rand.rand(this.length);
-        System.out.println(this.e.mod(this.Fn));
-        while((tempD.multiply(this.e)).mod(this.Fn).compareTo(BigInteger.ONE) != 0){
-            tempD = rand.rand(this.length);
-//            System.out.println((tempD.multiply(this.e)).mod(this.Fn));
-        }
-
-        this.d = tempD;
+    private void generateD(){
+        this.d = this.e.modInverse(this.Fn);
+//        Random rand = new Random();
+//        BigInteger tempD = rand.rand(this.length);
+//
+//
+//
+//        System.out.println(this.e.mod(this.Fn));
+//        while((tempD.multiply(this.e)).mod(this.Fn).compareTo(BigInteger.ONE) != 0){
+//            tempD = rand.rand(this.length);
+////            System.out.println((tempD.multiply(this.e)).mod(this.Fn));
+//        }
+//
+//        this.d = tempD;
 
     }
 
+    public BigInteger encrypt(BigInteger message){
+        return QuickBigMath.quickExpMod(message, this.e, this.n);
+    }
+
+    public BigInteger decrypt(BigInteger encryptedMsg){
+        return QuickBigMath.quickExpMod(encryptedMsg, this.d, this.n);
+    }
 }
