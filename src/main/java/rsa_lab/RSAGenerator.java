@@ -44,22 +44,18 @@ public class RSAGenerator {
 
     private void generateP(){
         this.p = pn.generatePrime(this.length);
-//        System.out.println(this.p);
     }
 
     private void generateQ(){
         this.q = pn.generatePrime(this.length);
-//        System.out.println(this.q);
     }
 
     private void countN(){
         this.n = p.multiply(q);
-//        System.out.println(this.n);
     }
 
     private void countFN(){
         this.Fn = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
-//        System.out.println("fn " + this.Fn);
     }
 
     private void generateE(){
@@ -71,8 +67,6 @@ public class RSAGenerator {
         }
 
         this.e = tempE;
-
-//        System.out.println(this.e);
     }
 
     private void generateD(){
@@ -93,10 +87,14 @@ public class RSAGenerator {
     }
 
     public BigInteger encrypt(BigInteger message){
+//        System.out.println("msg to encrypt " + message);
+//        System.out.println("result of qem "+QuickBigMath.quickExpMod(message, this.e, this.n));
         return QuickBigMath.quickExpMod(message, this.e, this.n);
     }
 
     public BigInteger decrypt(BigInteger encryptedMsg){
+//        System.out.println("msg to decrypt " + encryptedMsg);
+//        System.out.println("result of qem " + QuickBigMath.quickExpMod(encryptedMsg, this.d, this.n));
         return QuickBigMath.quickExpMod(encryptedMsg, this.d, this.n);
     }
 }

@@ -6,7 +6,7 @@ import java.math.BigInteger;
 public class RSAMain {
 
     public static void main(String[] args) throws IOException {
-        RSAGenerator gen = new RSAGenerator(256);
+        RSAGenerator gen = new RSAGenerator(2048);
         encrypt(gen);
         decrypt(gen);
     }
@@ -31,12 +31,10 @@ public class RSAMain {
         BigInteger encryptedMessage = gen.encrypt(toEncrypt);
 
 
-        String encryptedString = new String(encryptedMessage.toByteArray());
-
         File encryptOut = new File("./src/main/resources/encrypted.txt");
 
         FileWriter fw = new FileWriter(encryptOut);
-        fw.write(encryptedString);
+        fw.write(String.valueOf(encryptedMessage));
         fw.flush();
     }
 
@@ -46,16 +44,10 @@ public class RSAMain {
         FileReader fr = new FileReader(input);
         BufferedReader br = new BufferedReader(fr);
 
-        StringBuilder inputText = new StringBuilder();
 
-        String line;
+        String line = br.readLine();
 
-        while((line = br.readLine()) != null){
-            inputText.append(line);
-        }
-
-
-        BigInteger toDecrypt = new BigInteger(inputText.toString().getBytes());
+        BigInteger toDecrypt = new BigInteger(line);
 
 
         BigInteger decryptedMessage = gen.decrypt(toDecrypt);
