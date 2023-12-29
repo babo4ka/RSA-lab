@@ -5,6 +5,9 @@ import quickExpTask.QuickExp.QuickBigMath;
 import random.Random;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class RSAGenerator {
     private final int length;
@@ -86,15 +89,29 @@ public class RSAGenerator {
 
     }
 
-    public BigInteger encrypt(BigInteger message){
-//        System.out.println("msg to encrypt " + message);
-//        System.out.println("result of qem "+QuickBigMath.quickExpMod(message, this.e, this.n));
-        return QuickBigMath.quickExpMod(message, this.e, this.n);
+    public List<BigInteger> encrypt(String message){
+        String [] symbols = message.split("");
+
+        List<BigInteger> results = new ArrayList<>();
+
+        Arrays.stream(symbols).forEach(s -> results.add(QuickBigMath.quickExpMod(new BigInteger(s.getBytes()), this.e, this.n)));
+
+        return results;
+//        return QuickBigMath.quickExpMod(message, this.e, this.n);
     }
 
-    public BigInteger decrypt(BigInteger encryptedMsg){
-//        System.out.println("msg to decrypt " + encryptedMsg);
-//        System.out.println("result of qem " + QuickBigMath.quickExpMod(encryptedMsg, this.d, this.n));
-        return QuickBigMath.quickExpMod(encryptedMsg, this.d, this.n);
+    public String decrypt(String encryptedMsg){
+        String [] numsAsString = encryptedMsg.split(" ");
+        List<BigInteger> nums = new ArrayList<>();
+        Arrays.stream(numsAsString).forEach(nas -> nums.add(new BigInteger(nas)));
+
+        List<BigInteger> results = new ArrayList<>();
+        nums.forEach(n -> results.add(QuickBigMath.quickExpMod(n, this.d, this.n)));
+
+        StringBuilder sb = new StringBuilder();
+
+        results.forEach(r -> sb.append(new String(r.toByteArray())));
+
+        return sb.toString();
     }
 }

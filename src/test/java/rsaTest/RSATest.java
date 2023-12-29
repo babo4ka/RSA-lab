@@ -8,7 +8,9 @@ import rsa_lab.RSAGenerator;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RSATest {
@@ -17,13 +19,13 @@ public class RSATest {
     static final String encryptPath = "./src/test/resources/encrypt.txt";
     static final String decryptPath = "./src/test/resources/decrypt.txt";
 
-    static List<BigInteger> encryptedStrings = new ArrayList<>();
+    static List<String> encryptedStrings = new ArrayList<>();
 
     static RSAGenerator generator;
 
     @BeforeAll
     static void setup() throws IOException {
-        generator = new RSAGenerator(512);
+        generator = new RSAGenerator(100);
 
         File inputFile = new File(inputPath);
 
@@ -33,8 +35,16 @@ public class RSATest {
         String line;
 
         while((line = br.readLine()) != null){
-            BigInteger num = new BigInteger(line.getBytes());
-            encryptedStrings.add(num.modPow(generator.getE(), generator.getN()));
+            String [] symbols = line.split("");
+
+            List<BigInteger> encrypted = new ArrayList<>();
+
+            Arrays.stream(symbols).forEach(s -> encrypted.add(new BigInteger(s.getBytes()).modPow(generator.getE(), generator.getN())));
+
+            StringBuilder sb = new StringBuilder();
+            encrypted.forEach(e -> sb.append(e).append(" "));
+
+            encryptedStrings.add(sb.toString());
         }
 
     }
@@ -47,24 +57,34 @@ public class RSATest {
         FileReader fr = new FileReader(inputFile);
         BufferedReader br = new BufferedReader(fr);
 
-        List<BigInteger> nums = new ArrayList<>();
+        List<List<BigInteger>> encrypted = new ArrayList<>();
 
         String line;
 
         while((line = br.readLine()) != null){
-            BigInteger num = generator.encrypt(new BigInteger(line.getBytes()));
-            nums.add(num);
+            encrypted.add(generator.encrypt(line));
         }
 
-        Assertions.assertArrayEquals(nums.toArray(), encryptedStrings.toArray());
+        List<String> encStrings = new ArrayList<>();
+        encrypted.forEach(e -> {
+            StringBuilder sb = new StringBuilder();
+            e.forEach(el -> sb.append(el).append(" "));
+            encStrings.add(sb.toString());
+        });
+
+        Assertions.assertArrayEquals(encStrings.toArray(), encryptedStrings.toArray());
 
         File outputFile = new File(encryptPath);
 
         FileWriter fw = new FileWriter(outputFile);
 
-        for(BigInteger b : nums){
-            fw.write(b.toString() + "\n");
-        }
+        encStrings.forEach(es -> {
+            try {
+                fw.write(es + "\n");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         fw.flush();
     }
@@ -83,22 +103,23 @@ public class RSATest {
         List<String> inputStrings = new ArrayList<>();
         String inputLine;
 
-        List<String> decryptedStrings = new ArrayList<>();
         String encryptedLine;
 
         while((inputLine = inputBReader.readLine()) != null){
             inputStrings.add(inputLine);
         }
 
+        List<String> encryptedLines = new ArrayList<>();
         while((encryptedLine = encryptedBReader.readLine()) != null){
-            BigInteger toDecrypt = new BigInteger(encryptedLine);
-
-            BigInteger decrypted = generator.decrypt(toDecrypt);
-
-            decryptedStrings.add(new String(decrypted.toByteArray()));
+            encryptedLines.add(encryptedLine);
         }
 
-        Assertions.assertArrayEquals(inputStrings.toArray(), decryptedStrings.toArray());
+        List<String> decryptedMessages = new ArrayList<>();
+        encryptedLines.forEach(el -> decryptedMessages.add(generator.decrypt(el)));
+
+
+
+        Assertions.assertArrayEquals(inputStrings.toArray(), decryptedMessages.toArray());
     }
 
 }
