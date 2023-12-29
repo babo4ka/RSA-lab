@@ -2,6 +2,8 @@ package rsa_lab;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RSAMain {
 
@@ -17,24 +19,36 @@ public class RSAMain {
         FileReader fr = new FileReader(input);
         BufferedReader br = new BufferedReader(fr);
 
-        StringBuilder inputText = new StringBuilder();
+        List<String> inputText = new ArrayList<>();
 
         String line;
 
         while((line = br.readLine()) != null){
-            inputText.append(line);
+            inputText.add(line);
         }
 
+        List<BigInteger> toEncrypt = new ArrayList<>();
 
-        BigInteger toEncrypt = new BigInteger(inputText.toString().getBytes());
+        inputText.forEach(i -> toEncrypt.add(new BigInteger(i.getBytes())));
 
-        BigInteger encryptedMessage = gen.encrypt(toEncrypt);
+
+        List<BigInteger> encryptedMessages = new ArrayList<>();
+        toEncrypt.forEach(te -> encryptedMessages.add(gen.encrypt(te)));
+
 
 
         File encryptOut = new File("./src/main/resources/encrypted.txt");
 
         FileWriter fw = new FileWriter(encryptOut);
-        fw.write(String.valueOf(encryptedMessage));
+
+        encryptedMessages.forEach(em -> {
+            try {
+                fw.write(em + "\n");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         fw.flush();
     }
 
@@ -45,19 +59,36 @@ public class RSAMain {
         BufferedReader br = new BufferedReader(fr);
 
 
-        String line = br.readLine();
+        String line;
 
-        BigInteger toDecrypt = new BigInteger(line);
+        List<String> lines = new ArrayList<>();
 
+        while((line = br.readLine()) != null){
+            lines.add(line);
+        }
 
-        BigInteger decryptedMessage = gen.decrypt(toDecrypt);
+        List<BigInteger> toDecrypt = new ArrayList<>();
+        lines.forEach(l -> toDecrypt.add(new BigInteger(l)));
 
-        String decryptedString = new String(decryptedMessage.toByteArray());
+        List<BigInteger> decryptedMessages = new ArrayList<>();
+
+        toDecrypt.forEach(td -> decryptedMessages.add(gen.decrypt(td)));
+
+        List<String> decryptedStrings = new ArrayList<>();
+
+        decryptedMessages.forEach(dm -> decryptedStrings.add(new String(dm.toByteArray())));
+
 
         File decryptOut = new File("./src/main/resources/decrypted.txt");
 
         FileWriter fw = new FileWriter(decryptOut);
-        fw.write(decryptedString);
+        decryptedStrings.forEach(ds -> {
+            try {
+                fw.write(ds + "\n");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
         fw.flush();
     }
 
